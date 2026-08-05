@@ -302,7 +302,7 @@ class Patient(BaseModel):
     def validate_emergency_contact(cls, model): 
          if model.age > 60 and 'emergency' not in model.contact_details: 
              raise ValueError("Emergency contact is required for patients above 60 years old")
-         return
+         return model
        
     
 def update_patient_data(patient: Patient): 
