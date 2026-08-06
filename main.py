@@ -226,8 +226,8 @@
 - There are two modes for field_validator, before and after. By default mode is after. The before mode is used to validate the data before the type_validation and after mode is used to validate the data after the type_validation.
 """
 
-# from pydantic import BaseModel, EmailStr, AnyUrl, Field, field_validator
-# from typing import List, Dict, Optional, Annotated
+# from pydantic import BaseModel, EmailStr, field_validator
+# from typing import List, Dict
 
 # class Patient(BaseModel): 
 #     name: str
@@ -285,35 +285,158 @@
 - model_validator is decorator is used for custom validation and transformation on multiple fields.
 """
 
-from pydantic import BaseModel, EmailStr, AnyUrl, Field, model_validator
-from typing import List, Dict, Optional, Annotated
+# from pydantic import BaseModel, EmailStr, model_validator
+# from typing import List, Dict
+
+# class Patient(BaseModel): 
+#     name: str
+#     email: EmailStr
+#     age: int
+#     weight: float
+#     married: bool
+#     allergies: List[str]
+#     contact_details: Dict[str, str]
+    
+#     @model_validator(mode='after')      # default mode is after
+#     @classmethod
+#     def validate_emergency_contact(cls, model): 
+#          if model.age > 60 and 'emergency' not in model.contact_details: 
+#              raise ValueError("Emergency contact is required for patients above 60 years old")
+#          return model
+       
+    
+# def update_patient_data(patient: Patient): 
+#     print(patient.name)
+#     print(patient.email)
+#     print(patient.age)
+#     print(patient.married)
+#     print(patient.allergies)
+#     print("Updated Successfully ✅")
+
+# patient_info = {'name': 'John Doe', 'email': 'abc@hdfc.com', 'age': '70', 'weight': 70.5, 'married': True, 'allergies': ['pollen', 'dust'], 'contact_details': {'phone': '123-456-7890', 'emergency': '987-654-3210'}}
+# patient1 = Patient(**patient_info)
+
+# update_patient_data(patient1)
+
+
+
+
+
+"""_____________________PART-6(Data Validation4)_____________________"""
+"""
+- computed_field
+- computed_field is decorator is used to create a computed field in the model. A computed field is a field that is not stored in the database but is computed from other fields in the model.
+"""
+
+# from pydantic import BaseModel, EmailStr, computed_field
+# from typing import List, Dict
+
+# class Patient(BaseModel): 
+#     name: str
+#     email: EmailStr
+#     age: int
+#     weight: float #kg
+#     height: float #mtr
+#     married: bool
+#     allergies: List[str]
+#     contact_details: Dict[str, str]
+
+#     @computed_field
+#     @property
+#     def bmi(self) -> float: 
+#         bmi = round(self.weight/self.height**2, 2)
+#         return bmi 
+    
+       
+    
+# def update_patient_data(patient: Patient): 
+#     print(patient.name)
+#     print(patient.email)
+#     print(patient.age)
+#     print(patient.married)
+#     print('BMI:', patient.bmi)
+#     print(patient.allergies)
+#     print("Updated Successfully ✅")
+
+# patient_info = {'name': 'John Doe', 'email': 'abc@hdfc.com', 'age': '70', 'weight': 70.5, 'height': 1.75, 'married': True, 'allergies': ['pollen', 'dust'], 'contact_details': {'phone': '123-456-7890', 'emergency': '987-654-3210'}}
+# patient1 = Patient(**patient_info)
+
+# update_patient_data(patient1)
+
+
+
+
+
+
+"""_____________________PART-7(Data Validation5)_____________________"""
+"""
+- nested_model
+- nested_model is decorator is used to create a nested model in the model. A nested model is a model that is used as a field in another model.
+- here they improve the readability, reusability, nested models are validate independently no extra work needed.
+"""
+
+# from pydantic import BaseModel 
+
+# class Address(BaseModel):
+#     city: str
+#     state: str
+#     pin: str
+
+# class Patient(BaseModel): 
+#     name: str
+#     gender: str 
+#     age: int 
+#     address: Address  # Here Address is a nested model
+
+# address_dict = {'city': 'New York', 'state': 'NY', 'pin': '10001'}
+# address1 = Address(**address_dict)
+# patient_dict = {'name': 'John Doe', 'gender': 'Male', 'age': 30, 'address': address1}
+# patient1 = Patient(**patient_dict)
+
+# print(patient1)
+# print(patient1.name)    
+# print(patient1.address.city)
+
+
+
+
+
+"""_____________________PART-8(Serialization)_____________________"""
+"""
+- Exporting pydantic model to python dictonaries or json .
+- For this pydantic gives built in methods.
+- Helpful in -> building api's using fast-api, debugging, login.
+"""
+
+from pydantic import BaseModel 
+
+class Address(BaseModel):
+    city: str
+    state: str
+    pin: str
 
 class Patient(BaseModel): 
     name: str
-    email: EmailStr
-    age: int
-    weight: float
-    married: bool
-    allergies: List[str]
-    contact_details: Dict[str, str]
-    
-    @model_validator(mode='after')      # default mode is after
-    @classmethod
-    def validate_emergency_contact(cls, model): 
-         if model.age > 60 and 'emergency' not in model.contact_details: 
-             raise ValueError("Emergency contact is required for patients above 60 years old")
-         return model
-       
-    
-def update_patient_data(patient: Patient): 
-    print(patient.name)
-    print(patient.email)
-    print(patient.age)
-    print(patient.married)
-    print(patient.allergies)
-    print("Updated Successfully ✅")
+    gender: str = 'Male' 
+    age: int 
+    address: Address  # Here Address is a nested model
 
-patient_info = {'name': 'John Doe', 'email': 'abc@hdfc.com', 'age': '70', 'weight': 70.5, 'married': True, 'allergies': ['pollen', 'dust'], 'contact_details': {'phone': '123-456-7890', 'emergency': '987-654-3210'}}
-patient1 = Patient(**patient_info)
+address_dict = {'city': 'New York', 'state': 'NY', 'pin': '10001'}
+address1 = Address(**address_dict)
+patient_dict = {'name': 'John Doe', 'age': 30, 'address': address1}
+patient1 = Patient(**patient_dict)
 
-update_patient_data(patient1)
+temp1 = patient1.model_dump()  # model_dump() method is used to convert the pydantic model to python dictonary
+temp1_1 = patient1.model_dump(include={'name', 'age'})  # model_dump() method is used to convert the pydantic model to python dictonary with only included fields
+temp1_2 = patient1.model_dump(exclude={'name', 'age'})  # model_dump() method is used to convert the pydantic model to python dictonary with excluded fields
+temp1_3 = patient1.model_dump(exclude={'address': {'state'}})  # model_dump() method is used to convert the pydantic model to python dictonary with only excluded fields in nested model
+temp1_4 = patient1.model_dump(exclude_unset=True)  # model_dump() method is used to convert the pydantic model to python dictonary with only fields that are set (not default values)
+temp2 = patient1.model_dump_json()  # model_dump_json() method is used to convert the pydantic model to json string
+
+
+print(temp1, type(temp1))  
+print(temp1_1, type(temp1_1))  
+print(temp1_2, type(temp1_2))  
+print(temp1_3, type(temp1_3))  
+print(temp1_4, type(temp1_4))  
+print(temp2, type(temp2))  
