@@ -48,5 +48,15 @@
         "weight": 75,
         "bmi": 31.22,
         "verdict": "Obese"
+    },
+    "P006": {
+        "name": "Rahul Gupta",
+        "city": "Hyderabad",
+        "age": 19,
+        "gender": "Male",
+        "height": 1.74,
+        "weight": 55.0,
+        "bmi": 18.17,
+        "verdict": "Underweight"
     }
-}   
+}
