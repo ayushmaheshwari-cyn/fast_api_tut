@@ -390,7 +390,7 @@
 
 # address_dict = {'city': 'New York', 'state': 'NY', 'pin': '10001'}
 # address1 = Address(**address_dict)
-# patient_dict = {'name': 'John Doe', 'gender': 'Male', 'age': 30, 'address': address1}
+# patient_dict = {'name': 'John Doe', 'gender': 'male', 'age': 30, 'address': address1}
 # patient1 = Patient(**patient_dict)
 
 # print(patient1)
@@ -417,7 +417,7 @@
 
 # class Patient(BaseModel): 
 #     name: str
-#     gender: str = 'Male' 
+#     gender: str = 'male' 
 #     age: int 
 #     address: Address  # Here Address is a nested model
 
@@ -464,7 +464,7 @@
 #     name: Annotated[str, Field(..., description="Name of the patient")]
 #     city: Annotated[str, Field(..., description="City of the patient where he/she lives")] 
 #     age: Annotated[int, Field(..., description="Age of the patient", gt=0, le=120)]
-#     gender: Annotated[Literal["Male", "Female", "Others"], Field(..., description="Gender of the patient")]
+#     gender: Annotated[Literal["male", "female", "others"], Field(..., description="Gender of the patient")]
 #     height: Annotated[float, Field(..., description="Height of the patient in meters", gt=0)] 
 #     weight: Annotated[float, Field(..., description="Weight of the patient in kilograms", gt=0)]
 
@@ -559,7 +559,7 @@
 
 
 
-"""__________PART-6(POST request with Pydantic)__________"""
+"""__________PART-6(PUT and DELETE request with Pydantic)__________"""
 
 from fastapi import FastAPI, Path, HTTPException, Query                # Path is used to validate the path parameters, HTTPException is used to raise HTTP errors, Query is used to validate the query parameters
 from fastapi.responses import JSONResponse
@@ -574,7 +574,7 @@ class Patient(BaseModel):
     name: Annotated[str, Field(..., description="Name of the patient")]
     city: Annotated[str, Field(..., description="City of the patient where he/she lives")] 
     age: Annotated[int, Field(..., description="Age of the patient", gt=0, le=120)]
-    gender: Annotated[Literal["Male", "Female", "Others"], Field(..., description="Gender of the patient")]
+    gender: Annotated[Literal["male", "female", "others"], Field(..., description="Gender of the patient")]
     height: Annotated[float, Field(..., description="Height of the patient in meters", gt=0)] 
     weight: Annotated[float, Field(..., description="Weight of the patient in kilograms", gt=0)]
 
@@ -601,7 +601,7 @@ class PatientUpdate(BaseModel):
     city: Annotated[Optional[str], Field(default=None)]
     age: Annotated[Optional[int], Field(default=None, gt=0, le=120)]
     gender: Annotated[
-        Optional[Literal["Male", "Female", "Others"]],
+        Optional[Literal["male", "female", "others"]],
         Field(default=None)
     ]
     height: Annotated[Optional[float], Field(default=None, gt=0)]
@@ -685,12 +685,31 @@ def edit_patient(patient_id: str, patient_update: PatientUpdate):
     for key, value in updated_patient_info.items():
         existing_patient_info[key] = value
 
-    # here we also need to recalculate the bmi and verdict if height or weight is updated
+    # existing_patient_info  -> pydantic object -> updated bmi + verdict
     existing_patient_info['id'] = patient_id  # Add the patient ID to the existing patient info
     patient_pydantic_obj = Patient(**existing_patient_info)
 
-    data[patient_id] = patient_pydantic_obj.model_dump(exclude={'id'})  # Exclude the ID when saving back to the database
+    # pydantic object -> python dictonary
+    existing_patient_info = patient_pydantic_obj.model_dump()
 
+    # add this dictionary to data
+    data[patient_id] = existing_patient_info
+
+    # save the updated data to the JSON file
     save_data(data)
 
     return JSONResponse(status_code=200, content={"message": f"Patient with ID {patient_id} updated successfully", "patient": patient_pydantic_obj.model_dump()})
+
+@app.delete('/delete/{patient_id}')
+def delete_patient(patient_id: str):
+    #load_data 
+    data = load_data()
+
+    if patient_id not in data:
+        raise HTTPException(status_code=404, detail=f"Patient with ID {patient_id} not found")
+
+    del data[patient_id]
+
+    save_data(data)
+
+    return JSONResponse(status_code=200, content={"message": f"Patient with ID {patient_id} deleted successfully"}) 
